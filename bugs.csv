@@ -1,2 +1,2 @@
-************************************************************
-"Report","Sun Sep 30 17:05:42 2018","linux","3.6.6 (default, Sep 12 2018, 18:26:19)  [GCC 8.0.1 20180414 (experimental) [trunk revision 259383]]","(5, 0, 0, 'beta')","er","sttt ","erererera ","{"defaultFont":"Monospace","defaultFontSize":"14","defaultFontStyle":"normal","showPath":true,"currentWrap":"word","autoSaveOn":true,"autoSavePeriod":30000}","PyEdit"
+Report,created,platform,version,pyversion,user,steps,info,preferences,logfile,appname
+"Sun Oct  7 22:45:06 2018","linux","3.6.6 (default, Sep 12 2018, 18:26:19)  [GCC 8.0.1 20180414 (experimental) [trunk revision 259383]]","(5, 0, 0, 'beta')","Thomas","1) Step 1  2) \"Step\" 2  3) That's it  ","That's all there is to it! Have a nice day!  ","{"defaultFont":"Menlo for Powerline","defaultFontSize":"12","defaultFontStyle":"normal","showPath":true,"currentWrap":"word","autoSaveOn":true,"autoSavePeriod":30000}"," ","PyEdit"
