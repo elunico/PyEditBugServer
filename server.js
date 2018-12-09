@@ -22,14 +22,10 @@ function writeCSVColumns(file, columns) {
     columns.push(entry);
   }
   let line = columns.join(',');
-  writeCSVCompleteLine(buglog, line);
+  writeCSVCompleteLine(file, line);
 }
 
 function writeReportToFile(report, verbose) {
-  if (verbose === void 0) {
-    verbose = false;
-  }
-
   try {
     let log = verbose ? report.app.logfile : ' ';
     let columns = [
