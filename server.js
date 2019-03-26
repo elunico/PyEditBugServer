@@ -1,23 +1,19 @@
 // var bp = require('body-parser');
-var express = require('express');
-var fs = require('fs');
-var buglog = 'bugs.csv';
-var server = express();
+const crypto = require('crypto');
+const express = require('express');
+const Client = require('pg').Client;
+
+const passphrase = process.env.SHA256_HASH_PHRASE;
+const port = process.env.PORT || 8099;
+const buglog = 'bugs.csv';
+const server = express();
+
 server.use(express.json());
 server.use(express.urlencoded());
 server.use(express.static('public'))
 
-const port = process.env.PORT || 8099;
-const passphrase = "CATPASSPHRASE";
-
-const {
-  Client
-} = require('pg');
-
-
-
 function writeCSVCompleteLine(file, line) {
-  fs.appendFileSync(file, line + '\n', 'utf-8');
+  appendFileSync(file, line + '\n', 'utf-8');
 }
 
 function sanitizeColumnEntry(entry) {
@@ -53,9 +49,16 @@ server.listen(port);
 
 console.log(`Listening on ${port}`);
 
-server.post('/auth', (req, res) => {
+server.get('/cred', (req, res) => {
+  res.redirect(301, '/');
+})
+
+server.post('/cred', (req, res) => {
   let key = req.body.passphrase;
-  if (key === passphrase) {
+  let hashed = crypto.createHash('sha256');
+  hashed.update(key);
+  const input = hashed.digest('hex');
+  if (input === passphrase) {
     const client = new Client({
       connectionString: process.env.DATABASE_URL,
       ssl: true,
@@ -64,23 +67,18 @@ server.post('/auth', (req, res) => {
     client.connect();
     client.query('SELECT * FROM bugs', (err, sqlresp) => {
       if (err) {
-        res.writeHead(500, {
-          'Content-Type': 'text/plain',
-          'Success': 'false'
-        });
+        res.writeHead(500, {'Content-Type': 'text/plain', 'Success': 'false'});
         res.write('' + JSON.stringify(sqlresp));
         res.end();
         throw err;
       } else {
-        res.writeHead(200, {
-          'Content-Type': 'text/html',
-          'Success': 'true'
-        });
-        res.write("<html><head><style>table, th, td {" +
-          " border: 1px solid black;" +
-          " border-collapse: collapse;}\n" +
-          "th, td { min-width: 300px; }" +
-          "</style></head><body><table>");
+        res.writeHead(200, {'Content-Type': 'text/html', 'Success': 'true'});
+        res.write(
+            '<html><head><style>table, th, td {' +
+            ' border: 1px solid black;' +
+            ' border-collapse: collapse;}\n' +
+            'th, td { min-width: 300px; }' +
+            '</style></head><body><h1>PyEdit Bugs</h1><table>');
         let keys = Object.keys(sqlresp.rows[0]);
         if (keys) {
           res.write('<tr>');
@@ -92,30 +90,30 @@ server.post('/auth', (req, res) => {
         for (let row of sqlresp.rows) {
           res.write('<tr>');
           for (let value of Object.values(row)) {
-            res.write(`<td>${value.replace(/\S,\S/g, ", ")}</td>`);
+            let text = new String(value).replace(/(\S),(\S)/g, '$1, $2');
+            let truncText = text.substring(0, 45);
+            res.write(`<td alt=${text}>${text}</td>`);
           }
           res.write('</tr>');
         }
-        res.write(",</table></body></html>");
+        res.write(',</table></body></html>');
         res.end();
       }
       client.end();
     });
   } else {
-    res.writeHead(403, {
-      'Content-Type': 'text/plain',
-      'Success': 'false'
-    });
-    res.write('Invalid passphrase!');
+    res.writeHead(403, {'Content-Type': 'text/html', 'Success': 'false'});
+    res.write(
+        `<html><head><title>Invalid passphrase!</title></head><script> function redir_home() { setTimeout(() => { window.location = '/'; }, 1500); } </script><body onload="redir_home()" style="font-family: monospace"> <p>Invalid passphrase!</p><a href="/">Home</a></body></html>`);
     res.end();
   }
 });
 
-server.get('/list-success', function (req, res) {
+server.get('/list-success', function(req, res) {
 
 })
 
-server.post('/bug-report', function (req, res) {
+server.post('/bug-report', function(req, res) {
   var report = {
     'params': {
       'created': req.body.parameters.created.replace('\n', ' '),
@@ -135,7 +133,7 @@ server.post('/bug-report', function (req, res) {
     }
   };
   const queryTemplate =
-    'INSERT into bugs (created, platform, version, pyversion, user_user, steps, info, preferences, log, appname) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10);';
+      'INSERT into bugs (created, platform, version, pyversion, user_user, steps, info, preferences, log, appname) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10);';
   const parameters = [
     new Date(Date.parse(report.params.created)).toISOString(),
     report.params.platform, report.params.version, report.params.pyversion,
@@ -150,18 +148,12 @@ server.post('/bug-report', function (req, res) {
   client.connect();
   client.query(queryTemplate, parameters, (err, sqlresp) => {
     if (err) {
-      res.writeHead(500, {
-        'Content-Type': 'text/plain',
-        'Success': 'false'
-      });
+      res.writeHead(500, {'Content-Type': 'text/plain', 'Success': 'false'});
       res.write('' + JSON.stringify(sqlresp));
       res.end();
       throw err;
     } else {
-      res.writeHead(200, {
-        'Content-Type': 'text/plain',
-        'Success': 'true'
-      });
+      res.writeHead(200, {'Content-Type': 'text/plain', 'Success': 'true'});
       res.write('Successfully submitted bug report!');
       res.end();
     }
