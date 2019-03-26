@@ -12,39 +12,10 @@ server.use(express.json());
 server.use(express.urlencoded());
 server.use(express.static('public'))
 
-function writeCSVCompleteLine(file, line) {
-  appendFileSync(file, line + '\n', 'utf-8');
+function sanitizeTags(str) {
+  return str.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/&/g, '&amp;');
 }
 
-function sanitizeColumnEntry(entry) {
-  return `"${entry.replace(/"\n\\\t\v\r,/gi, ' ')}"`;
-}
-
-function writeCSVColumns(file, columns) {
-  for (let i = 0; i < columns.length; i++) {
-    let entry = columns.shift();
-    entry = sanitizeColumnEntry(entry);
-    columns.push(entry);
-  }
-  let line = columns.join(',');
-  writeCSVCompleteLine(file, line);
-}
-
-
-function writeReportToFile(report, verbose) {
-  try {
-    let log = verbose ? report.app.logfile : ' ';
-    let columns = [
-      report.params.created, report.params.platform, report.params.version,
-      report.params.pyversion, report.user.user, report.user.steps,
-      report.user.info, report.app.preferences, log, report.app.appname
-    ];
-    writeCSVColumns(buglog, columns);
-    return true;
-  } catch (err) {
-    return false;
-  }
-}
 server.listen(port);
 
 console.log(`Listening on ${port}`);
@@ -80,7 +51,7 @@ server.post('/cred', (req, res) => {
         if (keys) {
           res.write('<tr>');
           for (let key of keys) {
-            res.write(`<th>${key}</th>`);
+            res.write(`<th>${sanitizeTags(key)}</th>`);
           }
           res.write('</tr>');
         }
@@ -89,7 +60,7 @@ server.post('/cred', (req, res) => {
           for (let value of Object.values(row)) {
             let text = new String(value).replace(/(\S),(\S)/g, '$1, $2');
             let truncText = text.substring(0, 45);
-            res.write(`<td alt=${text}>${text}</td>`);
+            res.write(`<td>${sanitizeTags(text)}</td>`);
           }
           res.write('</tr>');
         }
