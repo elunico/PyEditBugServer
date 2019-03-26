@@ -81,19 +81,20 @@ server.post('/bug-report', function(req, res) {
         report.user.info, report.app.preferences, report.app.logfile,
         report.app.appname
       ],
-      (err, res) => {
+      (err, sqlresp) => {
         if (err) {
           res.writeHead(
               500, {'Content-Type': 'text/plain', 'Success': 'false'});
           res.write(
-              'An internal server error occurred. Report failed tosubmit');
+              'An internal server error occurred. Report failed tosubmit: ' +
+              JSON.stringify(sqlresp));
           res.end();
           throw err;
         }
         for (let row of res.rows) {
           console.log(JSON.stringify(row));
           res.writeHead(200, {'Content-Type': 'text/plain', 'Success': 'true'});
-          res.write('Successfully submitted bug report');
+          res.write('Successfully submitted bug report!');
           res.end();
         }
         client.end();
