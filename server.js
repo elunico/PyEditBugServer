@@ -44,14 +44,15 @@ server.post('/cred', (req, res) => {
         res.write(
             '<html><head><style>table, th, td {' +
             ' border: 1px solid black;' +
+            ' padding: 7px;' +
             ' border-collapse: collapse;}\n' +
-            'th, td { min-width: 300px; }' +
+            'th, td { min-width: 300px; font-family: monospace; }' +
             '</style></head><body><h1>PyEdit Bugs</h1><table>');
         let keys = Object.keys(sqlresp.rows[0]);
         if (keys) {
           res.write('<tr>');
           for (let key of keys) {
-            res.write(`<th>${sanitizeTags(key)}</th>`);
+            res.write(`<th> ${sanitizeTags(key)} </th>`);
           }
           res.write('</tr>');
         }
