@@ -4,7 +4,7 @@ var fs = require('fs');
 var buglog = 'bugs.csv';
 var server = express();
 server.use(express.json());
-server.static('public');
+server.use(express.static('public'))
 
 const port = process.env.PORT || 8099;
 const passphrase = "CATPASSPHRASE";
