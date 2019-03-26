@@ -76,10 +76,10 @@ server.post('/bug-report', function(req, res) {
   const queryTemplate =
       'INSERT into bugs (created, platform, version, pyversion, user_user, steps, info, preferences, log, appname) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10);';
   const parameters = [
-    new Date(Date.parse(report.params.created)), report.params.platform,
-    report.params.version, report.params.pyversion, report.user.user,
-    report.user.steps, report.user.info, report.app.preferences,
-    report.app.logfile, report.app.appname
+    new Date(Date.parse(report.params.created)).toISOString(),
+    report.params.platform, report.params.version, report.params.pyversion,
+    report.user.user, report.user.steps, report.user.info,
+    report.app.preferences, report.app.logfile, report.app.appname
   ];
   client.query(queryTemplate, parameters, (err, sqlresp) => {
     if (err) {
