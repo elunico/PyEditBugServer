@@ -53,7 +53,7 @@ server.listen(port);
 console.log(`Listening on ${port}`);
 
 server.post('/auth', (req, res) => {
-  console.log(req.body);
+  console.log(JSON.stringify(req));
   let key = req.body.passphrase;
   if (key === passphrase) {
     const client = new Client({
