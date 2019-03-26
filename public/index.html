@@ -1,6 +1,8 @@
 <html>
 
 <head>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha256-3edrmyuQ0w65f8gfBsqowzjJe2iM6n0nKciPUp8y+7E="
+        crossorigin="anonymous"></script>
     <script src="index.js"></script>
 </head>
 
@@ -8,11 +10,8 @@
     <h1>
         Enter the passphrase:
     </h1>
-    <form name="chk-cred" action="cred" method="post">
-        <input type="text" name="passphrase" id="passphrase" />
-        <input value="Submit" type="submit" />
-
-    </form>
+    <input type="text" name="passphrase" id="passphrase" />
+    <input type="button" onclick="tryCred()" name="Submit" value="Submit" />
 </body>
 
 </html>

@@ -54,10 +54,7 @@ server.get('/cred', (req, res) => {
 })
 
 server.post('/cred', (req, res) => {
-  let key = req.body.passphrase;
-  let hashed = crypto.createHash('sha256');
-  hashed.update(key);
-  const input = hashed.digest('hex');
+  let input = req.body.passphrase;
   if (input === passphrase) {
     const client = new Client({
       connectionString: process.env.DATABASE_URL,
@@ -104,7 +101,7 @@ server.post('/cred', (req, res) => {
   } else {
     res.writeHead(403, {'Content-Type': 'text/html', 'Success': 'false'});
     res.write(
-        `<html><head><title>Invalid passphrase!</title></head><script> function redir_home() { setTimeout(() => { window.location = '/'; }, 1500); } </script><body onload="redir_home()" style="font-family: monospace"> <p>Invalid passphrase!</p><a href="/">Home</a></body></html>`);
+        `<html><head><title>Invalid passphrase!</title></head><script> function redir_home() { setTimeout(() => { window.location = '/'; }, 1500); } </script><body onload="redir_home()" style="font-family: monospace"> <p>Invalid passphrase!</p><p>Redirecting to home in <span style="color: red" id="timer">1500</span>ms</p><script>setInterval(() => {document.getElementById('timer').innerHTML = (new Number(document.getElementById('timer').innerHTML) - 30); }, 33);</script><a href="/">Home</a></body></html>`);
     res.end();
   }
 });
