@@ -8,12 +8,16 @@ server.use(express.json());
 const port = process.env.PORT || 8099;
 
 const {
-  Pool
+  Client
 } = require('pg');
-const pool = new Pool({
+
+const client = new Client({
   connectionString: process.env.DATABASE_URL,
-  ssl: true
+  ssl: true,
 });
+
+client.connect();
+
 
 function writeCSVCompleteLine(file, line) {
   fs.appendFileSync(file, line + '\n', 'utf-8');
@@ -32,6 +36,7 @@ function writeCSVColumns(file, columns) {
   let line = columns.join(',');
   writeCSVCompleteLine(file, line);
 }
+
 
 function writeReportToFile(report, verbose) {
   try {
@@ -70,21 +75,43 @@ server.post('/bug-report', function (req, res) {
       'appname': req.body.app.appname.replace('\n', ' ')
     }
   };
-  if (writeReportToFile(report)) {
-    res.writeHead(200, {
-      'Content-Type': 'text/plain',
-      'Success': 'true'
+  client.query(
+    'INSERT into bugs (created, platform, version, pyversion, user_user, steps, info, preferences, log, appname) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);',
+    report.params.created, report.params.platform, report.params.version,
+    report.params.pyversion, report.user.user, report.user.steps,
+    report.user.info, report.app.preferences, report.app.logfile,
+    report.appnameapp.appname, (err, res) => {
+      if (err) {
+        res.writeHead(
+          500, {
+            'Content-Type': 'text/plain',
+            'Success': 'false'
+          });
+        res.write(
+          'An internal server error occurred. Report failed tosubmit');
+        res.end();
+        throw err;
+      }
+      for (let row of res.rows) {
+        console.log(JSON.stringify(row));
+        res.writeHead(200, {
+          'Content-Type': 'text/plain',
+          'Success': 'true'
+        });
+        res.write('Successfully submitted bug report');
+        res.end();
+      }
+      client.end();
     });
-    res.write('Successfully submitted bug report');
-    res.end();
-  } else {
-    res.writeHead(500, {
-      'Content-Type': 'text/plain',
-      'Success': 'false'
-    });
-    res.write('An internal server error occurred. Report failed to submit');
-    res.end();
-  }
+  // if (writeReportToFile(report)) {
+  //   res.writeHead(200, {'Content-Type': 'text/plain', 'Success': 'true'});
+  //   res.write('Successfully submitted bug report');
+  //   res.end();
+  // } else {
+  //   res.writeHead(500, {'Content-Type': 'text/plain', 'Success': 'false'});
+  //   res.write('An internal server error occurred. Report failed to submit');
+  //   res.end();
+  // }
 });
 
 console.log('Handling POST requests for /bug_report');
