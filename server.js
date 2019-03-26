@@ -76,7 +76,11 @@ server.post('/auth', (req, res) => {
           'Content-Type': 'text/html',
           'Success': 'true'
         });
-        res.write("<html><body><table>");
+        res.write("<html><head><style>table, th, td {" +
+          " border: 1px solid black;" +
+          " border-collapse: collapse;}\n" +
+          "th, td { min-width: 300px; }" +
+          "</style></head><body><table>");
         let keys = Object.keys(sqlresp.rows[0]);
         if (keys) {
           res.write('<tr>');
@@ -88,7 +92,7 @@ server.post('/auth', (req, res) => {
         for (let row of sqlresp.rows) {
           res.write('<tr>');
           for (let value of Object.values(row)) {
-            res.write(`<td>${value}</td>`);
+            res.write(`<td>${value.replace(/\S,\S/g, ", ")}</td>`);
           }
           res.write('</tr>');
         }
