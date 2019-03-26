@@ -88,7 +88,8 @@ server.post('/bug-report', function(req, res) {
       res.end();
       throw err;
     }
-    for (let row of res.rows) {
+    // for (let row of res.rows) {
+    else {
       console.log(JSON.stringify(row));
       res.writeHead(200, {'Content-Type': 'text/plain', 'Success': 'true'});
       res.write('Successfully submitted bug report!');
