@@ -73,7 +73,7 @@ server.post('/auth', (req, res) => {
         throw err;
       } else {
         res.writeHead(200, {
-          'Content-Type': 'text/plain',
+          'Content-Type': 'text/html',
           'Success': 'true'
         });
         res.write("<html><body><table>");
