@@ -1,9 +1,9 @@
-var bp = require('body-parser');
+// var bp = require('body-parser');
 var express = require('express');
 var fs = require('fs');
 var buglog = 'bugs.csv';
 var server = express();
-server.use(bp.json());
+server.use(express.json());
 
 const port = 8099;
 
