@@ -85,9 +85,7 @@ server.post('/bug-report', function(req, res) {
         if (err) {
           res.writeHead(
               500, {'Content-Type': 'text/plain', 'Success': 'false'});
-          res.write(
-              'An internal server error occurred. Report failed tosubmit: ' +
-              JSON.stringify(sqlresp));
+          res.write(sqlresp);
           res.end();
           throw err;
         }
