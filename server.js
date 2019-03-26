@@ -53,7 +53,8 @@ server.listen(port);
 console.log(`Listening on ${port}`);
 
 server.post('/auth', (req, res) => {
-  let key = req.body.parameters.hashedPhrase;
+  console.log(req.body);
+  let key = req.body.passphrase;
   if (key === passphrase) {
     const client = new Client({
       connectionString: process.env.DATABASE_URL,
