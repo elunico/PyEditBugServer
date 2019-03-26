@@ -75,10 +75,13 @@ server.post('/bug-report', function(req, res) {
   };
   client.query(
       'INSERT into bugs (created, platform, version, pyversion, user_user, steps, info, preferences, log, appname) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);',
-      report.params.created, report.params.platform, report.params.version,
-      report.params.pyversion, report.user.user, report.user.steps,
-      report.user.info, report.app.preferences, report.app.logfile,
-      report.app.appname, (err, res) => {
+      [
+        report.params.created, report.params.platform, report.params.version,
+        report.params.pyversion, report.user.user, report.user.steps,
+        report.user.info, report.app.preferences, report.app.logfile,
+        report.app.appname
+      ],
+      (err, res) => {
         if (err) {
           res.writeHead(
               500, {'Content-Type': 'text/plain', 'Success': 'false'});
