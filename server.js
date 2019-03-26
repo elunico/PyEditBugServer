@@ -11,12 +11,6 @@ const {
   Client
 } = require('pg');
 
-const client = new Client({
-  connectionString: process.env.DATABASE_URL,
-  ssl: true,
-});
-
-client.connect();
 
 
 function writeCSVCompleteLine(file, line) {
@@ -83,6 +77,12 @@ server.post('/bug-report', function (req, res) {
     report.user.user, report.user.steps, report.user.info,
     report.app.preferences, report.app.logfile, report.app.appname
   ];
+  const client = new Client({
+    connectionString: process.env.DATABASE_URL,
+    ssl: true,
+  });
+
+  client.connect();
   client.query(queryTemplate, parameters, (err, sqlresp) => {
     if (err) {
       res.writeHead(500, {
@@ -92,9 +92,7 @@ server.post('/bug-report', function (req, res) {
       res.write('' + JSON.stringify(sqlresp));
       res.end();
       throw err;
-    }
-    // for (let row of res.rows) {
-    else {
+    } else {
       res.writeHead(200, {
         'Content-Type': 'text/plain',
         'Success': 'true'
@@ -104,15 +102,6 @@ server.post('/bug-report', function (req, res) {
     }
     client.end();
   });
-  // if (writeReportToFile(report)) {
-  //   res.writeHead(200, {'Content-Type': 'text/plain', 'Success': 'true'});
-  //   res.write('Successfully submitted bug report');
-  //   res.end();
-  // } else {
-  //   res.writeHead(500, {'Content-Type': 'text/plain', 'Success': 'false'});
-  //   res.write('An internal server error occurred. Report failed to submit');
-  //   res.end();
-  // }
 });
 
 console.log('Handling POST requests for /bug_report');
