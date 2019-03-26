@@ -7,9 +7,7 @@ server.use(express.json());
 
 const port = process.env.PORT || 8099;
 
-const {
-  Client
-} = require('pg');
+const {Client} = require('pg');
 
 const client = new Client({
   connectionString: process.env.DATABASE_URL,
@@ -56,7 +54,7 @@ server.listen(port);
 
 console.log(`Listening on ${port}`);
 
-server.post('/bug-report', function (req, res) {
+server.post('/bug-report', function(req, res) {
   var report = {
     'params': {
       'created': req.body.parameters.created.replace('\n', ' '),
@@ -76,35 +74,29 @@ server.post('/bug-report', function (req, res) {
     }
   };
   client.query(
-    'INSERT into bugs (created, platform, version, pyversion, user_user, steps, info, preferences, log, appname) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);',
-    [
-      Date.parse(report.params.created), report.params.platform,
-      report.params.version, report.params.pyversion, report.user.user,
-      report.user.steps, report.user.info, report.app.preferences,
-      report.app.logfile, report.app.appname
-    ],
-    (err, sqlresp) => {
-      if (err) {
-        res.writeHead(
-          500, {
-            'Content-Type': 'text/plain',
-            'Success': 'false'
-          });
-        res.write(sqlresp);
-        res.end();
-        throw err;
-      }
-      for (let row of res.rows) {
-        console.log(JSON.stringify(row));
-        res.writeHead(200, {
-          'Content-Type': 'text/plain',
-          'Success': 'true'
-        });
-        res.write('Successfully submitted bug report!');
-        res.end();
-      }
-      client.end();
-    });
+      'INSERT into bugs (created, platform, version, pyversion, user_user, steps, info, preferences, log, appname) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);',
+      [
+        Date.parse(report.params.created), report.params.platform,
+        report.params.version, report.params.pyversion, report.user.user,
+        report.user.steps, report.user.info, report.app.preferences,
+        report.app.logfile, report.app.appname
+      ],
+      (err, sqlresp) => {
+        if (err) {
+          res.writeHead(
+              500, {'Content-Type': 'text/plain', 'Success': 'false'});
+          res.write('' + JSON.stringify(sqlresp));
+          res.end();
+          throw err;
+        }
+        for (let row of res.rows) {
+          console.log(JSON.stringify(row));
+          res.writeHead(200, {'Content-Type': 'text/plain', 'Success': 'true'});
+          res.write('Successfully submitted bug report!');
+          res.end();
+        }
+        client.end();
+      });
   // if (writeReportToFile(report)) {
   //   res.writeHead(200, {'Content-Type': 'text/plain', 'Success': 'true'});
   //   res.write('Successfully submitted bug report');
