@@ -4,8 +4,10 @@ var fs = require('fs');
 var buglog = 'bugs.csv';
 var server = express();
 server.use(express.json());
+server.static('public');
 
 const port = process.env.PORT || 8099;
+const passphrase = "CATPASSPHRASE";
 
 const {
   Client
@@ -49,6 +51,48 @@ function writeReportToFile(report, verbose) {
 server.listen(port);
 
 console.log(`Listening on ${port}`);
+
+server.post('/auth', (req, res) => {
+  let key = req.body.parameters.hashedPhrase;
+  if (key === passphrase) {
+    const client = new Client({
+      connectionString: process.env.DATABASE_URL,
+      ssl: true,
+    });
+
+    client.connect();
+    client.query('SELECT * FROM bugs', (err, sqlresp) => {
+      if (err) {
+        res.writeHead(500, {
+          'Content-Type': 'text/plain',
+          'Success': 'false'
+        });
+        res.write('' + JSON.stringify(sqlresp));
+        res.end();
+        throw err;
+      } else {
+        res.writeHead(200, {
+          'Content-Type': 'text/plain',
+          'Success': 'true'
+        });
+        for (row of sqlresp.rows) res.write(`<p>${JSON.stringify(row)}</p>`);
+        res.end();
+      }
+      client.end();
+    });
+  } else {
+    res.writeHead(403, {
+      'Content-Type': 'text/plain',
+      'Success': 'false'
+    });
+    res.write('Invalid passphrase!');
+    res.end();
+  }
+});
+
+server.get('/list-success', function (req, res) {
+
+})
 
 server.post('/bug-report', function (req, res) {
   var report = {
