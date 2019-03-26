@@ -7,6 +7,14 @@ server.use(express.json());
 
 const port = process.env.PORT || 8099;
 
+const {
+  Pool
+} = require('pg');
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: true
+});
+
 function writeCSVCompleteLine(file, line) {
   fs.appendFileSync(file, line + '\n', 'utf-8');
 }
