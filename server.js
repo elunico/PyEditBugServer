@@ -4,6 +4,7 @@ var fs = require('fs');
 var buglog = 'bugs.csv';
 var server = express();
 server.use(express.json());
+server.use(express.urlencoded());
 server.use(express.static('public'))
 
 const port = process.env.PORT || 8099;
@@ -53,7 +54,6 @@ server.listen(port);
 console.log(`Listening on ${port}`);
 
 server.post('/auth', (req, res) => {
-  console.log(JSON.stringify(req));
   let key = req.body.passphrase;
   if (key === passphrase) {
     const client = new Client({
