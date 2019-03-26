@@ -76,7 +76,23 @@ server.post('/auth', (req, res) => {
           'Content-Type': 'text/plain',
           'Success': 'true'
         });
-        for (row of sqlresp.rows) res.write(`<p>${JSON.stringify(row)}</p>`);
+        res.write("<html><body><table>");
+        let keys = Object.keys(sqlresp.rows[0]);
+        if (keys) {
+          res.write('<tr>');
+          for (let key of keys) {
+            res.write(`<th>${key}</th>`);
+          }
+          res.write('</tr>');
+        }
+        for (let row of sqlresp.rows) {
+          res.write('<tr>');
+          for (let value of Object.values(row)) {
+            res.write(`<td>${value}</td>`);
+          }
+          res.write('</tr>');
+        }
+        res.write(",</table></body></html>");
         res.end();
       }
       client.end();
