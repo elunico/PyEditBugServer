@@ -5,7 +5,7 @@ var buglog = 'bugs.csv';
 var server = express();
 server.use(express.json());
 
-const port = 8099;
+const port = process.env.PORT || 8099;
 
 function writeCSVCompleteLine(file, line) {
   fs.appendFileSync(file, line + '\n', 'utf-8');
