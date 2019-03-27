@@ -1,0 +1,144 @@
+<html>
+
+<head>
+  <title>Submit Bug Report</title>
+  <style>
+    table,
+    td,
+    tr {
+      padding: 7px;
+      min-width: 150px;
+      font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    }
+
+    input,
+    textarea {
+      width: 300px;
+    }
+
+    textarea {
+      height: 200px;
+    }
+
+    input#submit {
+      width: 100px;
+    }
+  </style>
+</head>
+
+<body>
+  <h2>Submit Bug Report for PyEdit</h2>
+  <h4 style="color: red">All fields are required</h4>
+
+
+  <form action="do-submit" method=POST id="bug-report-form">
+    <input type="datetime" name="created" id="created-input" value="" hidden />
+
+    <table>
+      <tr>
+        <td><label for="user">Name</label></td>
+        <td><input type="text" id="user" name="user" value="" placeholder="name" /></td>
+      </tr>
+      <tr>
+        <td><label for="steps">Steps</label></td>
+        <td><textarea name="steps" id="steps" value="" placeholder="Steps to cause bug"
+            form="bug-report-form"></textarea></td>
+      </tr>
+      <tr>
+        <td><label for="Info">Info</label></td>
+        <td><textarea name="info" id="info" value="" placeholder="Steps to cause bug" form="bug-report-form"></textarea>
+        </td>
+      </tr>
+      <tr>
+        <td><label for="pyversion">Version of PyEdit</label></td>
+        <td><input type="text" id="pyversion" name="pyversion" value="" placeholder="(X, X, X, Beta)" /> </td>
+        <td><span style="font-size: 0.8em; font-weight: bold"> <span id="valid-py-message"></span></span></td>
+      </tr>
+      <tr>
+        <td><label for="version">Version of Python</label></td>
+        <td><input type="text" id="version" name="version" value=""
+            placeholder="Paste output of `sys.version` or python --version" /></td>
+        <td><span style="font-size: 0.8em; font-weight: bold"> <span id="valid-version-message"></span></span></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td><input disabled id="submit" type="submit" value="Submit" /></td>
+      </tr>
+    </table>
+
+  </form>
+  <script>
+    document.getElementById('created-input').value = Date.now();
+  </script>
+  <script>
+
+    function validVersion(elt) {
+      let val = elt.value.toLowerCase();
+      let subtitle = document.getElementById('valid-version-message');
+      if (!val.match(/\d+\.\d+\.\d+/)) {
+        subtitle.innerHTML = 'Invalid Python Version! Make sure X.Y.Z appears in version somewhere';
+        subtitle.style = "color: red";
+        return false;
+      } else {
+        subtitle.innerHTML = 'Acceptable Python Version!';
+        subtitle.style = "color: green";
+        return true;
+      }
+    }
+
+    function isAllFilled(elts) {
+      for (elt of elts) {
+        if (elt.value.replace(/\s/g, '') === '') {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    function validPyVersion(elt, didCheck) {
+      let val = elt.value.toLowerCase();
+      let subtitle = document.getElementById('valid-py-message');
+      if (!val.match(/^\(\d+, \d+, \d+, (alpha|beta|release|rc)\)$/)) {
+        subtitle.innerHTML = 'Invalid PyEdit Version! Use format (X, Y, Z, Type)';
+        subtitle.style = "color: red";
+        return false;
+      } else {
+        subtitle.innerHTML = 'PyEditVersion Valid!';
+        subtitle.style = "color: green";
+        return true;
+      }
+    }
+
+    function allFormInputs() {
+      let elt1 = document.getElementById('version');
+      let elt2 = document.getElementById('pyversion');
+      let elt3 = document.getElementById('user');
+      let elt4 = document.getElementById('steps');
+      let elt5 = document.getElementById('info');
+      return [elt1, elt2, elt3, elt4, elt5];
+    }
+
+    let elts = allFormInputs();
+
+    function validateForm() {
+      if (!validVersion(document.getElementById('version')) | !validPyVersion(document.getElementById('pyversion')) |
+        !isAllFilled(elts)) {
+        document.getElementById('submit').disabled = true;
+      } else {
+        document.getElementById('submit').disabled = false;
+      }
+    }
+
+    elts[0].oninput = () => validateForm();
+    elts[1].oninput = () => validateForm();
+    elts[2].oninput = () => validateForm();
+    elts[3].oninput = () => validateForm();
+    elts[4].oninput = () => validateForm();
+
+  </script>
+  <p>
+    <a href="/">Home</a>
+  </p>
+</body>
+
+</html>

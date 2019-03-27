@@ -12,15 +12,7 @@ server.use(express.urlencoded());
 server.use(express.static('public'))
 
 function sanitizeTags(str) {
-  return str.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/&/g, '&amp;');
-}
-
-function signedString(num) {
-  let rv = new String(num);
-  if (rv >= 0) {
-    rv = '+' + rv;
-  }
-  return rv;
+  return str.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/&/g, '&amp;').replace('\\n', '<br/>');
 }
 
 server.listen(port);
@@ -73,9 +65,9 @@ server.post('/cred', (req, res) => {
             }
             res.write('</tr>');
           }
-          res.write('</table></body></html>');
+          res.write('</table><p><a href="/">Home</a></p></body></html>');
         } else {
-          res.write('<p> No bugs reported</p>');
+          res.write('<p> No bugs reported</p><p><a href="/">Home</a></p>');
           res.write('</body></html>');
         }
 
@@ -97,6 +89,32 @@ server.post('/cred', (req, res) => {
   }
 });
 
+server.get('/do-submit', (req, res) => {
+  res.redirect(301, '/');
+});
+
+server.post('/do-submit', function (req, res) {
+  var report = {
+    'params': {
+      'created': new Date(Number(req.body.created)),
+      'version': req.body.version.replace('\n', ' '),
+      'pyversion': req.body.pyversion.replace('\n', ' '),
+      'platform': '<unknown>'
+    },
+    'user': {
+      'user': req.body.user.replace('\n', ' '),
+      'steps': req.body.steps.replace('\n', ' '),
+      'info': req.body.info.replace('\n', ' ')
+    },
+    'app': {
+      'preferences': '<unknown>',
+      'logfile': '<unknown>',
+      'appname': '<unknown>'
+    }
+  };
+  commitReportToDB(res, report, true);
+});
+
 server.post('/bug-report', function (req, res) {
   var report = {
     'params': {
@@ -116,6 +134,10 @@ server.post('/bug-report', function (req, res) {
       'appname': req.body.app.appname.replace('\n', ' ')
     }
   };
+  commitReportToDB(res, report, false);
+});
+
+function commitReportToDB(httpResponse, report, richResponse) {
   const queryTemplate =
     'INSERT into bugs (created, platform, version, pyversion, user_user, steps, info, preferences, log, appname) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10);';
   let isoDate = new Date(Date.parse(report.params.created)).toUTCString();
@@ -133,17 +155,22 @@ server.post('/bug-report', function (req, res) {
   client.connect();
   client.query(queryTemplate, parameters, (err, sqlresp) => {
     if (err) {
-      res.writeHead(500, { 'Content-Type': 'text/plain', 'Success': 'false' });
-      res.write('' + JSON.stringify(sqlresp));
-      res.end();
-      throw err;
+      httpResponse.writeHead(500, { 'Content-Type': 'text/plain', 'Success': 'false' });
+      httpResponse.write('' + JSON.stringify(err));
+      httpResponse.end();
+      // throw err;
     } else {
-      res.writeHead(200, { 'Content-Type': 'text/plain', 'Success': 'true' });
-      res.write('Successfully submitted bug report!');
-      res.end();
+      if (richResponse) {
+        httpResponse.writeHead(200, { 'Content-Type': 'text/html', 'Success': 'true' });
+        httpResponse.write('<html><head><title>Success!</title></head><body><h2>Successfully submitted bug report.</h2><p><a href="/">home</a></p></body></html>');
+      }
+      else {
+        httpResponse.writeHead(200, { 'Content-Type': 'text/plain', 'Success': 'true' });
+        httpResponse.write('Successfully submitted bug report!');
+      }
+      httpResponse.end();
     }
     client.end();
   });
-});
-
+}
 console.log('Handling POST requests for /bug_report');
