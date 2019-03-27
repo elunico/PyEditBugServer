@@ -162,7 +162,7 @@ function commitReportToDB(httpResponse, report, richResponse) {
     } else {
       if (richResponse) {
         httpResponse.writeHead(200, { 'Content-Type': 'text/html', 'Success': 'true' });
-        httpResponse.write('<html><head><title>Success!</title></head><body><h2>Successfully submitted bug report.</h2><p><a href="/">home</a></p></body></html>');
+        httpResponse.write(`<html><head><title>Success!</title></head><body><h2>Successfully submitted bug report.</h2><p>Report submitted:</p><textarea disabled style="width:640px; height:480px;">${JSON.stringify(report, null, 4)}</textarea><p><a href="/">home</a></p></body></html>`);
       }
       else {
         httpResponse.writeHead(200, { 'Content-Type': 'text/plain', 'Success': 'true' });
