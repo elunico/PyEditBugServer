@@ -99,7 +99,7 @@
     function validPyVersion(elt, didCheck) {
       let val = elt.value.toLowerCase();
       let subtitle = document.getElementById('valid-py-message');
-      if (!val.match(/^\(\d+, \d+, \d+, (alpha|beta|release|rc)\)$/)) {
+      if (!val.match(/^\(\d+,\s*\d+,\s*\d+,\s*(alpha|beta|release|rc)\)$/)) {
         subtitle.innerHTML = 'Invalid PyEdit Version! Use format (X, Y, Z, Type)';
         subtitle.style = "color: red";
         return false;

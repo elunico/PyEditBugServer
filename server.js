@@ -9,7 +9,9 @@ const server = express();
 
 server.use(express.json());
 server.use(express.urlencoded());
-server.use(express.static('public'))
+server.use(express.static('public'));
+server.set('view engine', 'pug');
+server.set('views', './private/templates');
 
 function sanitizeTags(str) {
   return str.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/&/g, '&amp;').replace('\\n', '<br/>');
@@ -20,12 +22,14 @@ server.listen(port);
 console.log(`Listening on ${port}`);
 
 server.get('/cred', (req, res) => {
+  console.log('GET /cred redirected to home');
   res.redirect(301, '/');
 });
 
 server.post('/cred', (req, res) => {
   let input = req.body.passphrase;
   if (input === passphrase) {
+    console.log("Passphrase passed");
     const client = new Client({
       connectionString: process.env.DATABASE_URL,
       ssl: true,
@@ -34,8 +38,10 @@ server.post('/cred', (req, res) => {
     client.connect();
     client.query('SELECT * FROM bugs', (err, sqlresp) => {
       if (err) {
+        console.warn("SQL error in attempt to read records from database. Passphrase passed");
+        console.warn(JSON.stringify(err));
         res.writeHead(500, { 'Content-Type': 'text/plain', 'Success': 'false' });
-        res.write('' + JSON.stringify(sqlresp));
+        res.write('' + JSON.stringify(err));
         res.end();
         throw err;
       } else {
@@ -76,20 +82,14 @@ server.post('/cred', (req, res) => {
       client.end();
     });
   } else {
-    res.writeHead(403, { 'Content-Type': 'text/html', 'Success': 'false' });
-    res.write(
-      `<html><head><title>Invalid passphrase!</title></head>` +
-      `<script> function redir_home() { setTimeout(() => { window.location = '/'; }, 1500); } </script>` +
-      `<body onload="redir_home()" style="font-family: monospace">` +
-      `<p>Invalid passphrase!</p><p>Redirecting to home in <span style="color: red" id="timer">1500</span>ms</p>` +
-      `<script>setInterval(() => {document.getElementById('timer').innerHTML = (new Number(document.getElementById('timer').innerHTML) - 30); }, 33);</script>` +
-      `<a href="/">Home</a>` +
-      `</body></html>`);
+    console.log("Invalid passphrase attempt");
+    res.render('invalid-phrase');
     res.end();
   }
 });
 
 server.get('/do-submit', (req, res) => {
+  console.log("GET at /do-submit redirected to home");
   res.redirect(301, '/');
 });
 
@@ -155,14 +155,15 @@ function commitReportToDB(httpResponse, report, richResponse) {
   client.connect();
   client.query(queryTemplate, parameters, (err, sqlresp) => {
     if (err) {
+      console.warn("SQL error at submit report on web");
+      console.warn(JSON.stringify(err));
       httpResponse.writeHead(500, { 'Content-Type': 'text/plain', 'Success': 'false' });
       httpResponse.write('' + JSON.stringify(err));
       httpResponse.end();
       // throw err;
     } else {
       if (richResponse) {
-        httpResponse.writeHead(200, { 'Content-Type': 'text/html', 'Success': 'true' });
-        httpResponse.write(`<html><head><title>Success!</title></head><body><h2>Successfully submitted bug report.</h2><p>Report submitted:</p><textarea disabled style="width:640px; height:480px;">${JSON.stringify(report, null, 4)}</textarea><p><a href="/">home</a></p></body></html>`);
+        httpResponse.render('web-submit-success.pug', { message: JSON.stringify(report, null, 4) });
       }
       else {
         httpResponse.writeHead(200, { 'Content-Type': 'text/plain', 'Success': 'true' });
@@ -173,4 +174,4 @@ function commitReportToDB(httpResponse, report, richResponse) {
     client.end();
   });
 }
-console.log('Handling POST requests for /bug_report');
+console.log(`Mapped all routes.`);
