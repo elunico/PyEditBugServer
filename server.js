@@ -1,11 +1,13 @@
 /* eslint-disable quotes */
 /* eslint-disable no-console */
+const fs = require('fs');
 const express = require('express');
 const Client = require('pg').Client;
 
 const passphrase = process.env.SHA256_HASH_PHRASE;
 const port = process.env.PORT || 8099;
 const server = express();
+const https = require('https');
 
 server.use(express.json());
 server.use(express.urlencoded());
@@ -17,9 +19,28 @@ function sanitizeTags(str) {
   return str.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/&/g, '&amp;').replace('\\n', '<br/>');
 }
 
-server.listen(port);
+// server.listen(port);
+let httpsServer = https.createServer({
+  key: fs.readFileSync('./key.pem'),
+  cert: fs.readFileSync('./cert.pem'),
+  passphrase: 'catphrase'
+}, server);
+httpsServer.listen(port);
 
 console.log(`Listening on ${port}`);
+
+server.get('/search', (req, res) => {
+  res.render('search');
+});
+
+server.get('/search-results', (req, res) => {
+  res.writeHead(200, { 'Content-Type': 'text/html' });
+  res.write(`You submitted ${req.query.platform}<br>`);
+  res.write(`You submitted ${req.query.user}<br>`);
+  res.write(`You submitted ${req.query.pyversion}<br>`);
+
+  res.end();
+});
 
 server.get('/cred', (req, res) => {
   console.log('GET /cred redirected to home');
