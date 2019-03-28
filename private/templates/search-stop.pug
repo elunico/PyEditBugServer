@@ -1,0 +1,18 @@
+html
+  head 
+    title Search Enter Passphrase 
+    script(src="index.js")
+    script(src="https://code.jquery.com/jquery-3.3.1.slim.min.js", integrity="sha256-3edrmyuQ0w65f8gfBsqowzjJe2iM6n0nKciPUp8y+7E=", crossorigin="anonymous")
+
+    include bootstrap
+    include default-margins 
+body 
+
+  h2 Enter passphrase to search:
+  
+  input(type="text", name="passphrase", id="passphrase")
+  input(type="button", onclick="checkHash('search', '/search-stop')", name="Submit", value="Submit")
+  input(type="text", name="dest", id="dest", hidden=true, value="/search-stop")
+  p
+
+  include footer 

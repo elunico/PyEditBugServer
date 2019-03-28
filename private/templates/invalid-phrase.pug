@@ -2,14 +2,13 @@ html
 head
 title Invalid passphrase!
 script(type="text/javascript").
-      function redir_home() { setTimeout(() => { window.location = '/'; }, 1500); }
+      function redir_home() { setTimeout(() => { window.location = '#{dest}'; }, 1500); }
 
 
 body(onload="redir_home()" style="font-family: monospace")
       p Invalid passphrase!
-      p Redirecting to home in !{' '}
+      p Redirecting to #{dest} in !{' '}
           span(style="color: red" id="timer")  1500
       script(type="text/javascript").
             setInterval(() => { document.getElementById('timer').innerHTML = (new Number(document.getElementById('timer').innerHTML) - 30); }, 33);
       include footer
-

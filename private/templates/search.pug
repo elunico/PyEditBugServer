@@ -2,40 +2,46 @@ html
 
 head
 
-style(type="text/css").
+  include bootstrap
+  include default-margins 
 
-  td.label {
-    width:100px;
-  }
+  style(type="text/css").
 
-  input {
-    width:250px;
-  }
+    td.label {
+      width:100px;
+    }
 
-  input#submit {
-    width: 75px;
-  }
+    input {
+      width:250px;
+    }
 
-title Search Bugs
+    input#submit {
+      width: 75px;
+    }
 
-body
-form(name="search", id="search-form" action="search-results", method='GET')
-table
-  tr
-    td(class="label")
-      label(for="platform") Platform:
-    td
-      input(name="platform", form="search-form", type="text", id="platform-input")
-  tr
-    td(class="label")
-      label(for="user") User:
-    td
-      input(name="user", form="search-form", type="text", id="user-input")
-  tr
-    td(class="label")
-      label(for="pyversion") PyVersion:
-    td
-      input(name="pyversion", form="search-form", type="text", id="pyversion-input")
-  tr
-    td
-      input(id='submit',form="search-form", type='submit', value='Submit')
+  title Search Bugs
+
+  body
+    h3 Enter search query
+    form(name="search", id="search-form" action="search-results", method='GET')
+      table
+        tr
+          td(class="label")
+            label(for="platform").col-form-label Platform:
+          td
+            input(name="platform", form="search-form", type="text", id="platform-input").form-control
+        tr
+          td(class="label")
+            label(for="user").col-form-label User:
+          td
+            input(name="user", form="search-form", type="text", id="user-input").form-control
+        tr
+          td(class="label")
+            label(for="pyversion").col-form-label PyVersion:
+          td
+            input(name="pyversion", form="search-form", type="text", id="pyversion-input").form-control
+        tr
+          td
+            input(id='submit',form="search-form", type='submit', value='Submit')
+
+    include footer
