@@ -1,0 +1,101 @@
+html 
+    head 
+        include bootstrap  
+        
+        include buttons 
+        style(type="text/css").
+            body {
+                margin-left: 20%;
+                margin-right: 20%;
+                margin-top: 5%;
+                color: rgb(21, 21, 21);
+                line-height: 1.2;
+            }
+
+            p.warning{
+                color: red;
+                font-size: 1.2em;
+                font-weight: bold;
+            }
+
+            p.warranty {
+                color: black;
+                font-size: 1.1em;
+                font-weight: bold;
+                font-style: italic;
+                text-decoration: underline;
+            }
+
+            span.code {
+                font-family: 'Source Code Pro', 'Source Code Pro for Powerline', 'Haskelig', 'Menlo', 'Bitstream Vera Sans', 'Menlo for Powerline', 'Consolas', 'Monaco', 'Courier', 'Courier New', monospace;
+                color:black;
+                background: rgb(230,230,230);
+            }
+    body 
+
+        h1 PyEdit Bug Database API 
+
+        p.warning The PyEdit Bug Database as well as the API is a work in progress! Please be careful and pardon our appearence as we continue improving 
+        p.warranty The PyEdit Bug Database as well as the API, PyEdit and all affiliated software is presented as is without warranty and no one is responsible for whatever horrible things these programs may break or information they may expose. Do not use important or personally identifiable information ANYWHERE on this website. It is not secure. No personally identifiable website should be stored here. This is a hobby project at best
+
+        h3 1. Public and Guarded (Non-Public) Routes 
+
+        p The API is divided into two parts. All API routes begin with 
+            span.code /api 
+            | .Some begin with 
+            span.code /api/public 
+            |  . These routes do not require entering the passphrase and are free to access by anyone. There are a couple of these routes but they are mainly used internally by the application when displaying messages to the user on the web.
+        p The one major other place they appear is in the PyEdit program itself where 
+            span.code /api/public/submit-report
+            |  is used to submit bug reports from within the PyEdit Application.
+        p If you want to use a route that is not public, you will need a token. 
+        h3 2. Tokens
+        p Tokens are a generated string of 48 bytes. They are presented to the user upon generation and stored in localStorage for ease of use. 
+            | any route that requires a token will check the following 
+            ul 
+                li if the route is a 
+                    b GET 
+                    | request: the query string for the parameter 
+                    span.code token
+                li if the route is a 
+                    b POST 
+                    | request: the body of the request for the parameter 
+                    span.code token
+                    |  i note that POST requests accept JSON data in all cases for the parameters passed 
+                li 
+                    b localStorage 
+                    | if all else fails.
+            | Tokens that are generated through the web interface have a life time of 14 days. Then they expire and you will need to generate a new one 
+        p You may generate a maximum of 
+            b 1 Token per Day.
+        h3 3. The 
+            span.code /api/search
+            |  route 
+        
+        p This is a 
+            b GET 
+            |  route 
+        
+        p The parameters that can be provided (currently) are 
+        ul 
+            li 
+                b 
+                    span.code pyversion
+                    | : the version of PyEdit 
+            li 
+                b 
+                    span.code user
+                    | : the name of the user 
+            li 
+                b 
+                    span.code platform
+                    | : the platform (os base) that PyEdit was running on (blank for web-based submissions of bug reports)
+            li 
+                b 
+                    span.code token
+                    | : your API token. Can also be omitted if you have it in localStorage. 
+        
+        | all of these parameters can be omitted in any condition except the token which can only be omitted if you have the token present in localStorage.
+        
+            
+    include footer 

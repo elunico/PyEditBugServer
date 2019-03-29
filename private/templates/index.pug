@@ -6,25 +6,43 @@ head
 
     include bootstrap
     include default-margins
+    include buttons 
+
+    //- style(type="text/css").
+    //-     body {
+    //-         background-image: url("assets/pybug.png");
+    //-         background-repeat: no-repeat;
+    //-         opacity: 20%;
+     
+            
+    //-     }
+
+  
 
 body
-    h2 Enter passphrase:
-    input(type="text", name="passphrase", id="passphrase")
-    input(type="button", onclick="checkHash('all', '/')", name="Submit", value="Submit")
-    input(type="text", name="dest", id="dest", hidden=true, value="/")
-    p
+    //- h2 Enter passphrase:
+    //- input(type="text", name="passphrase", id="passphrase")
+    //- input(type="button", onclick="checkHash('all', '/')", name="Submit", value="Submit")
+    //- input(type="text", name="dest", id="dest", hidden=true, value="/")
 
     
-    p
-        i try 
-            b 
-                a(href="search") searching 
-            | !{' '} the database.
-    p
-        i or  
-          b 
-            a(href="submit_report.html") submit a bug report
-          | !{' '} online (no passphrase required!).
+    center 
+        h2 Welcome to the PyEdit Bug Database! 
+
+        p
+            button.button 
+                span
+                    a(href="/search").button Search
+
+        p
+            button.button
+                span
+                    a(href="/submit_report").button Submit Bug report
+        
+        p
+            button.button
+                span
+                    a(href="/api-docs").button See the API
    
     
     include footer 

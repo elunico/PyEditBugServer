@@ -1,5 +1,6 @@
 /* eslint-disable no-console */
 const Client = require('pg').Client;
+const handleSQLError = require('util').handleSQLError;
 
 class SearchResultsController {
   constructor(request, response) {
@@ -11,14 +12,7 @@ class SearchResultsController {
     return s.replace(/[\\'[%"]/g, '');
   }
 
-  handle() {
-    let pyversion = this.request.query.pyversion;
-    let user = this.request.query.user;
-    let platform = this.request.query.platform;
-    // if (!(pyversion && user && platform) && (platform || pyversion || user))
-    // {
-    //   throw 'Fill out all search fields or none';
-    // }
+  makeQuery(pyversion, user, platform) {
     let query = 'SELECT * FROM bugs';
     if (platform || user || pyversion) {
       query += ' WHERE ';
@@ -40,7 +34,15 @@ class SearchResultsController {
           `platform iLIKE '%${SearchResultsController.sqlString(platform)}%'`;
     }
     query += ';';
+    return query;
+  }
 
+  handleGetCSV() {
+    let pyversion = this.request.query.pyversion;
+    let user = this.request.query.user;
+    let platform = this.request.query.platform;
+
+    let query = this.makeQuery(pyversion, user, platform);
 
     const sqlClient = new Client({
       connectionString: process.env.DATABASE_URL,
@@ -49,19 +51,50 @@ class SearchResultsController {
     sqlClient.connect();
     sqlClient.query(query, (err, sqlresp) => {
       if (err) {
-        console.warn(
-            'SQL error in attempt to read records from database. Passphrase passed');
-        console.warn(JSON.stringify(err));
+        handleSQLError(err, sqlClient, this.response);
+        throw err;
+      } else {
         this.response.writeHead(
-            500, {'Content-Type': 'text/plain', 'Success': 'false'});
-        this.response.write('' + JSON.stringify(err));
+            200, 'Success', {'Content-Type': 'application/csv'});
+        if (sqlresp.rows[0]) {
+          let keys = Object.keys(sqlresp.rows[0]);
+          let header = keys.join(',');
+          let entries = [];
+          let rows = sqlresp.rows.map((i) => Object.values(i));
+          for (let line of rows) {
+            entries.push(line.join(','));
+          }
+          let body = entries.join('\n');
+          let text = header + '\n' + body;
+          this.response.write(text);
+        } else {
+          this.response.write('');
+        }
         this.response.end();
-        sqlClient.end()
+        sqlClient.end();
+      }
+    });
+  }
+
+  handle() {
+    let pyversion = this.request.query.pyversion;
+    let user = this.request.query.user;
+    let platform = this.request.query.platform;
+
+    let query = this.makeQuery(pyversion, user, platform);
+
+    const sqlClient = new Client({
+      connectionString: process.env.DATABASE_URL,
+      ssl: true,
+    });
+    sqlClient.connect();
+    sqlClient.query(query, (err, sqlresp) => {
+      if (err) {
+        handleSQLError(err, sqlClient, this.response);
         throw err;
       } else {
         if (sqlresp.rows[0]) {
           let keys = Object.keys(sqlresp.rows[0]);
-          console.log(keys);
           let rows = sqlresp.rows.map((i) => Object.values(i));
           this.response.render(
               'search-results',

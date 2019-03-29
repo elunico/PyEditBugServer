@@ -21,14 +21,12 @@ function checkHash(goal, failPlace) {
   let d = crypto.subtle.digest('SHA-256', data);
   d.then((value) => {
     let form =
-      $('<form hidden action="cred" method="post">' +
-        '<input type="text" name="passphrase" value="' + hexString(value) +
-        '" />' +
-        '<input type="text" name="dest" value="' + failPlace +
-        '" />' +
-        '<input type="text" name="goal" value="' + goal +
-        '" />' +
-        '</form>');
+        $('<form hidden action="/cred" method="post">' +
+          '<input type="text" name="passphrase" value="' + hexString(value) +
+          '" />' +
+          '<input type="text" name="dest" value="' + failPlace + '" />' +
+          '<input type="text" name="goal" value="' + goal + '" />' +
+          '</form>');
     $('body').append(form);
     form.submit();
   });

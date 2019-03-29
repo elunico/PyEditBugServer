@@ -1,0 +1,25 @@
+html 
+    head 
+        include bootstrap
+        include default-margins
+        title Successfully generated a token 
+
+    body 
+        h2 Successfully generated a token
+        p 
+            b Token: 
+            =token 
+        p 
+            b Expires: 
+            =expires
+
+        script(type="text/javascript").
+            localStorage.setItem('pybug-token', JSON.stringify({
+              expires: '#{expires}',
+              ip: '#{ip}',
+              token: '#{token}',
+              created: '#{created}'
+
+            }));
+
+        include footer 

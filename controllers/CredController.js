@@ -18,6 +18,7 @@ class CredController {
     let input = this.request.body.passphrase;
     let dest = this.request.body.dest;
     let goal = this.request.body.goal;
+
     if (input === passphrase) {
       console.log('Passphrase passed');
 
@@ -39,7 +40,9 @@ class CredController {
           }
         });
       } else if (goal === 'search') {
-        this.response.redirect(307, '/search')
+        this.response.redirect(307, '/search');
+      } else if (goal === 'token') {
+        this.response.redirect(307, '/api/generate-token');
       } else {
         this.response.writeHead(404);
         this.response.end();

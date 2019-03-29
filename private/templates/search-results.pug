@@ -27,4 +27,17 @@ else
           td= v 
 
 p
+p 
+  input(type="button", onclick="getCSVDownload()", value="Download as CSV")
+  script(text="text/javascript").
+    function getCSVDownload() {
+      let query = window.location.search;
+      if (!query) {
+        query = '?token=' + ((JSON.parse(localStorage.getItem('pybug-token') || '{}')).token) || ''; 
+      } else {
+        query += '&token=' + ((JSON.parse(localStorage.getItem('pybug-token') || '{}')).token) || ''; 
+      }
+
+      window.open('/api/search' + query, '_parent');
+    }
 include footer
