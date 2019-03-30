@@ -4,11 +4,9 @@ const handleSQLError = require('util').handleSQLError;
 const makeQuery = require('util').makeQuery;
 const sqlString = require('util').sqlString;
 
-class SearchResultsController {
+class SearchResultsCSVController {
   constructor(request, response) {
-
-    return function () {
-      console.log('do this');
+    return function handleGetCSV() {
       let pyversion = request.query.pyversion;
       let user = request.query.user;
       let platform = request.query.platform;
@@ -25,16 +23,23 @@ class SearchResultsController {
           handleSQLError(err, sqlClient, response);
           throw err;
         } else {
+          response.writeHead(
+            200, 'Success', { 'Content-Type': 'application/csv' });
           if (sqlresp.rows[0]) {
             let keys = Object.keys(sqlresp.rows[0]);
+            let header = keys.join(',');
+            let entries = [];
             let rows = sqlresp.rows.map((i) => Object.values(i));
-            response.render(
-              'search-results',
-              { keys: keys, vals: rows, nResults: rows.length });
+            for (let line of rows) {
+              entries.push(line.join(','));
+            }
+            let body = entries.join('\n');
+            let text = header + '\n' + body;
+            response.write(text);
           } else {
-            response.render(
-              'search-results', { keys: [], vals: [], nResults: 0 });
+            response.write('');
           }
+          response.end();
           sqlClient.end();
         }
       });
@@ -42,5 +47,4 @@ class SearchResultsController {
   }
 }
 
-
-module.exports = SearchResultsController;
+module.exports = SearchResultsCSVController;

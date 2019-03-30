@@ -2,6 +2,7 @@
 /* eslint-disable no-console */
 const express = require('express');
 const SearchResultsController = require('./controllers/SearchResultsController');
+const SearchResultsCSVController = require('./controllers/SearchResultsCSVController');
 const CredController = require('./controllers/CredController');
 const GenerateTokenController = require('./controllers/GenerateTokenController');
 const validTokenOrThrow = require('./controllers/TokenVerifier');
@@ -22,56 +23,30 @@ server.listen(port);
 
 console.log(`Listening on ${port}`);
 
-server.get('/search', (req, res) => {
-  res.redirect('/search-stop');
-});
+server.get('/search', (_, res) => res.redirect('/search-stop'));
 
 server.post('/search', (req, res) => {
-  let input = req.body.passphrase;
-  if (input === passphrase) {
+  if (req.body.passphrase === passphrase)
     res.render('search');
-  } else {
-    console.log(input);
-    console.log('failed');
+  else
     res.redirect('/search-stop');
-  }
 });
 
-server.get('/submit_report', (req, res) => {
-  res.render('submit_report');
-});
+server.get('/submit_report', (_, res) => res.render('submit_report'));
 
-server.get('/search-results', (req, res) => {
-  let controller = new SearchResultsController(req, res);
-  controller.handle();
-});
+server.get('/search-results', (req, res) => new SearchResultsController(req, res));
 
-server.get('/api-docs', (req, res) => {
-  res.render('api-docs');
-});
+server.get('/api-docs', (_, res) => res.render('api-docs'));
 
-server.get('/', (req, res) => {
-  res.render('index');
-});
+server.get('/', (_, res) => res.render('index'));
 
-server.get('/search-stop', (req, res) => {
-  res.render('search-stop');
-});
+server.get('/search-stop', (_, res) => res.render('search-stop'));
 
-server.get('/cred', (req, res) => {
-  console.log('GET /cred redirected to home');
-  res.redirect(301, '/');
-});
+server.get('/cred', (_, res) => res.redirect(301, '/'));
 
-server.post('/cred', (req, res) => {
-  let a = new CredController(req, res);
-  a.handle();
-});
+server.post('/cred', (req, res) => new CredController(req, res));
 
-server.get('/do-submit', (req, res) => {
-  console.log('GET at /do-submit redirected to home');
-  res.redirect(301, '/');
-});
+server.get('/do-submit', (_, res) => res.redirect(301, '/'));
 
 server.post('/do-submit', function (req, res) {
   var report = {
@@ -92,15 +67,13 @@ server.post('/do-submit', function (req, res) {
       'appname': '<unknown>'
     }
   };
-  let controller = new CommitToDatabaseController(res, report, true);
-  controller.handle();
+  let action = new CommitToDatabaseController(res, report, true);
+  action();
 });
 
-server.get('/api/search', (req, res) => {
-  validTokenOrThrow(req.query.token)
-    .then(() => new SearchResultsController(req, res).handleGetCSV())
-    .catch(() => res.render('invalid-token'));
-});
+server.get('/api/search', (req, res) => validTokenOrThrow(req.query.token)
+  .then(() => new SearchResultsCSVController(req, res))
+  .catch(() => res.render('invalid-token')));
 
 server.post('/api/public/submit-report', function (req, res) {
   var report = {
@@ -121,18 +94,12 @@ server.post('/api/public/submit-report', function (req, res) {
       'appname': req.body.app.appname.replace('\n', ' ')
     }
   };
-  let controller = new CommitToDatabaseController(res, report, false);
-  controller.handle();
+  let action = new CommitToDatabaseController(res, report, false);
+  action();
 });
 
-server.get('/api/public/new-token', (req, res) => {
-  res.render('token-stop');
-});
+server.get('/api/public/new-token', (_, res) => res.render('token-stop'));
 
-server.post('/api/generate-token', (req, res) => {
-  let ip = /* req.headers['x-forwarded-for'] || */ req.connection.remoteAddress;
-  let generateTokenController = new GenerateTokenController(ip, req, res);
-  generateTokenController.handle();
-});
+server.post('/api/generate-token', (req, res) => new GenerateTokenController(req.connection.remoteAddress, req, res));
 
 console.log(`Mapped all routes.`);
