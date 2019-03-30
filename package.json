@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js",
-    "dev": ". ./setenv.sh && node_modules/.bin/nodemon server.js"
+    "dev": ". ./setenv.sh && node_modules/.bin/nodemon server.js",
+    "windev": "node_modules/.bin/nodemon server.js"
   },
   "author": "Thomas Povinelli",
   "dependencies": {

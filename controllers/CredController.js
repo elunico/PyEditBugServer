@@ -3,9 +3,9 @@ const Client = require('pg').Client;
 
 function sanitizeTags(str) {
   return str.replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/&/g, '&amp;')
-      .replace('\\n', '<br/>');
+    .replace(/>/g, '&gt;')
+    .replace(/&/g, '&amp;')
+    .replace('\\n', '<br/>');
 }
 
 class CredController {
@@ -36,7 +36,7 @@ class CredController {
             throw err;
           } else {
             this.writeAllRows(sqlresp);
-            sqlClient.end()
+            sqlClient.end();
           }
         });
       } else if (goal === 'search') {
@@ -56,19 +56,19 @@ class CredController {
 
   writeError(err) {
     console.warn(
-        'SQL error in attempt to read records from database. Passphrase passed');
+      'SQL error in attempt to read records from database. Passphrase passed');
     console.warn(JSON.stringify(err));
     this.response.writeHead(
-        500, {'Content-Type': 'text/plain', 'Success': 'false'});
+      500, {'Content-Type': 'text/plain', 'Success': 'false'});
     this.response.write('' + JSON.stringify(err));
     this.response.end();
   }
 
   writeAllRows(sqlresp) {
     this.response.writeHead(
-        200, {'Content-Type': 'text/html', 'Success': 'true'});
+      200, {'Content-Type': 'text/html', 'Success': 'true'});
     this.response.write(
-        '<html><head><title>PyEdit Bugs</title><style>table, th, td {' +
+      '<html><head><title>PyEdit Bugs</title><style>table, th, td {' +
         ' border: 1px solid black;' +
         ' padding: 7px;' +
         ' border-collapse: collapse;}\n' +
@@ -95,7 +95,7 @@ class CredController {
       this.response.write('</table><p><a href="/">Home</a></p></body></html>');
     } else {
       this.response.write(
-          '<p> No bugs reported</p><p><a href="/">Home</a></p>');
+        '<p> No bugs reported</p><p><a href="/">Home</a></p>');
       this.response.write('</body></html>');
     }
 

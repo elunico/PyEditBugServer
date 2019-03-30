@@ -32,18 +32,18 @@ class CommitToDatabaseController {
         console.warn('SQL error at submit report on web');
         console.warn(JSON.stringify(err));
         httpResponse.writeHead(
-            500, {'Content-Type': 'text/plain', 'Success': 'false'});
+          500, {'Content-Type': 'text/plain', 'Success': 'false'});
         httpResponse.write('' + JSON.stringify(err));
         httpResponse.end();
         // throw err;
       } else {
         if (richResponse) {
           httpResponse.render(
-              'web-submit-success.pug',
-              {message: JSON.stringify(report, null, 4)});
+            'web-submit-success.pug',
+            {message: JSON.stringify(report, null, 4)});
         } else {
           httpResponse.writeHead(
-              200, {'Content-Type': 'text/plain', 'Success': 'true'});
+            200, {'Content-Type': 'text/plain', 'Success': 'true'});
           httpResponse.write('Successfully submitted bug report!');
         }
         httpResponse.end();
