@@ -2,7 +2,6 @@
 /* eslint-disable no-console */
 const express = require('express');
 const SearchResultsController = require('./controllers/SearchResultsController');
-const SearchResultsCSVController = require('./controllers/SearchResultsCSVController');
 const CredController = require('./controllers/CredController');
 const GenerateTokenController = require('./controllers/GenerateTokenController');
 const validTokenOrThrow = require('./controllers/TokenVerifier');
@@ -23,30 +22,56 @@ server.listen(port);
 
 console.log(`Listening on ${port}`);
 
-server.get('/search', (_, res) => res.redirect('/search-stop'));
-
-server.post('/search', (req, res) => {
-  if (req.body.passphrase === passphrase)
-    res.render('search');
-  else
-    res.redirect('/search-stop');
+server.get('/search', (req, res) => {
+  res.redirect('/search-stop');
 });
 
-server.get('/submit_report', (_, res) => res.render('submit_report'));
+server.post('/search', (req, res) => {
+  let input = req.body.passphrase;
+  if (input === passphrase) {
+    res.render('search');
+  } else {
+    console.log(input);
+    console.log('failed');
+    res.redirect('/search-stop');
+  }
+});
 
-server.get('/search-results', (req, res) => new SearchResultsController(req, res));
+server.get('/submit_report', (req, res) => {
+  res.render('submit_report');
+});
 
-server.get('/api-docs', (_, res) => res.render('api-docs'));
+server.get('/search-results', (req, res) => {
+  let controller = new SearchResultsController(req, res);
+  controller.handle();
+});
 
-server.get('/', (_, res) => res.render('index'));
+server.get('/api-docs', (req, res) => {
+  res.render('api-docs');
+});
 
-server.get('/search-stop', (_, res) => res.render('search-stop'));
+server.get('/', (req, res) => {
+  res.render('index');
+});
 
-server.get('/cred', (_, res) => res.redirect(301, '/'));
+server.get('/search-stop', (req, res) => {
+  res.render('search-stop');
+});
 
-server.post('/cred', (req, res) => new CredController(req, res));
+server.get('/cred', (req, res) => {
+  console.log('GET /cred redirected to home');
+  res.redirect(301, '/');
+});
 
-server.get('/do-submit', (_, res) => res.redirect(301, '/'));
+server.post('/cred', (req, res) => {
+  let a = new CredController(req, res);
+  a.handle();
+});
+
+server.get('/do-submit', (req, res) => {
+  console.log('GET at /do-submit redirected to home');
+  res.redirect(301, '/');
+});
 
 server.post('/do-submit', function (req, res) {
   var report = {
@@ -67,13 +92,15 @@ server.post('/do-submit', function (req, res) {
       'appname': '<unknown>'
     }
   };
-  let action = new CommitToDatabaseController(res, report, true);
-  action();
+  let controller = new CommitToDatabaseController(res, report, true);
+  controller.handle();
 });
 
-server.get('/api/search', (req, res) => validTokenOrThrow(req.query.token)
-  .then(() => new SearchResultsCSVController(req, res))
-  .catch(() => res.render('invalid-token')));
+server.get('/api/search', (req, res) => {
+  validTokenOrThrow(req.query.token)
+    .then(() => new SearchResultsController(req, res).handleGetCSV())
+    .catch(() => res.render('invalid-token'));
+});
 
 server.post('/api/public/submit-report', function (req, res) {
   var report = {
@@ -94,12 +121,18 @@ server.post('/api/public/submit-report', function (req, res) {
       'appname': req.body.app.appname.replace('\n', ' ')
     }
   };
-  let action = new CommitToDatabaseController(res, report, false);
-  action();
+  let controller = new CommitToDatabaseController(res, report, false);
+  controller.handle();
 });
 
-server.get('/api/public/new-token', (_, res) => res.render('token-stop'));
+server.get('/api/public/new-token', (req, res) => {
+  res.render('token-stop');
+});
 
-server.post('/api/generate-token', (req, res) => new GenerateTokenController(req.connection.remoteAddress, req, res));
+server.post('/api/generate-token', (req, res) => {
+  let ip = /* req.headers['x-forwarded-for'] || */ req.connection.remoteAddress;
+  let generateTokenController = new GenerateTokenController(ip, req, res);
+  generateTokenController.handle();
+});
 
 console.log(`Mapped all routes.`);
