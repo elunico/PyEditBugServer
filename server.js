@@ -1,11 +1,14 @@
 /* eslint-disable quotes */
 /* eslint-disable no-console */
 const express = require('express');
-const SearchResultsController = require('./controllers/SearchResultsController');
+const SearchResultsController =
+    require('./controllers/SearchResultsController');
 const CredController = require('./controllers/CredController');
-const GenerateTokenController = require('./controllers/GenerateTokenController');
+const GenerateTokenController =
+    require('./controllers/GenerateTokenController');
 const validTokenOrThrow = require('./controllers/TokenVerifier');
-const CommitToDatabaseController = require('./controllers/CommitToDatabaseController');
+const CommitToDatabaseController =
+    require('./controllers/CommitToDatabaseController');
 
 const passphrase = process.env.SHA256_HASH_PHRASE;
 const port = process.env.PORT || 8099;
@@ -73,7 +76,7 @@ server.get('/do-submit', (req, res) => {
   res.redirect(301, '/');
 });
 
-server.post('/do-submit', function (req, res) {
+server.post('/do-submit', function(req, res) {
   var report = {
     'params': {
       'created': new Date(Number(req.body.created)),
@@ -98,11 +101,11 @@ server.post('/do-submit', function (req, res) {
 
 server.get('/api/search', (req, res) => {
   validTokenOrThrow(req.query.token)
-    .then(() => new SearchResultsController(req, res).handleGetCSV())
-    .catch(() => res.render('invalid-token'));
+      .then(() => new SearchResultsController(req, res).handleGetCSV())
+      .catch(() => res.render('invalid-token'));
 });
 
-server.post('/api/public/submit-report', function (req, res) {
+server.post('/api/public/submit-report', function(req, res) {
   var report = {
     'params': {
       'created': req.body.parameters.created.replace('\n', ' '),
@@ -133,6 +136,66 @@ server.post('/api/generate-token', (req, res) => {
   let ip = /* req.headers['x-forwarded-for'] || */ req.connection.remoteAddress;
   let generateTokenController = new GenerateTokenController(ip, req, res);
   generateTokenController.handle();
+});
+
+// Update checking routes
+
+const newestVersion = [6, 0, 0, 'rc'];
+
+server.get('/updates-available', (req, res) => {
+  let currentVersion =
+      [req.query.major, req.query.minor, req.query.sub, req.query.vtype];
+  if (!currentVersion) {
+    res.writeHead(500, 'Invalid version', {'Content-Type': 'text/plain'});
+    res.write('Invalid version provided ' + currentVersion);
+    res.end()
+  }
+  // get newest version from somewhere?
+  console.log(req.query.major);
+  console.log(req.query.minor);
+  console.log(req.query.sub);
+  console.log(req.query.vtype);
+  console.log(newestVersion);
+  if (req.query.major < newestVersion[0]) {
+    updateNeeded(currentVersion, newestVersion, res);
+  } else if (req.query.major == newestVersion[0]) {
+    if (req.query.minor < newestVersion[1]) {
+      updateNeeded(currentVersion, newestVersion, res);
+    } else if (req.query.minor == newestVersion[1]) {
+      if (req.query.sub < newestVersion[2]) {
+        updateNeeded(currentVersion, newestVersion, res);
+      }
+    }
+  } else {
+    res.writeHead(
+        200, 'Success', {'Content-Type': 'text/plain', 'x-update': false});
+    res.write('No update available');
+    res.end();
+  }
+});
+
+function updateNeeded(currentVersion, newestVersion, response) {
+  response.writeHead(
+      200, 'Success', {'Content-Type': 'text/plain', 'x-update': true});
+  response.write(
+      'Update available. You have version (' + currentVersion +
+      ') newest version is (' + newestVersion + ')');
+  response.end();
+}
+
+server.get('/get-update-script', (req, res) => {
+  // TODO: ignores version query parameters
+  let platform = req.query.platform;
+  if (platform == 'bat') {
+    res.sendFile(__dirname + '/private/updates/update_script.bat');
+  } else {
+    res.sendFile(__dirname + '/private/updates/update_script.sh');
+  }
+});
+
+server.get('/get-update', (req, res) => {
+  // TODO: ignores version query parameters
+  res.sendFile(__dirname + '/private/updates/pyedit_text_update.py');
 });
 
 console.log(`Mapped all routes.`);
