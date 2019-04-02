@@ -20,7 +20,7 @@ class SearchResultsController {
     let seen = false;
     if (pyversion) {
       query +=
-          `pyversion iLIKE '%${SearchResultsController.sqlString(pyversion)}%'`;
+        `pyversion iLIKE '%${SearchResultsController.sqlString(pyversion)}%'`;
       seen = true;
     }
     if (user) {
@@ -31,7 +31,7 @@ class SearchResultsController {
     if (platform) {
       if (seen) query += ' and ';
       query +=
-          `platform iLIKE '%${SearchResultsController.sqlString(platform)}%'`;
+        `platform iLIKE '%${SearchResultsController.sqlString(platform)}%'`;
     }
     query += ';';
     return query;
@@ -55,7 +55,7 @@ class SearchResultsController {
         throw err;
       } else {
         this.response.writeHead(
-          200, 'Success', {'Content-Type': 'application/csv'});
+          200, 'Success', { 'Content-Type': 'application/csv' });
         if (sqlresp.rows[0]) {
           let keys = Object.keys(sqlresp.rows[0]);
           let header = keys.join(',');
@@ -98,10 +98,10 @@ class SearchResultsController {
           let rows = sqlresp.rows.map((i) => Object.values(i));
           this.response.render(
             'search-results',
-            {keys: keys, vals: rows, nResults: rows.length});
+            { keys: keys, vals: rows, nResults: rows.length });
         } else {
           this.response.render(
-            'search-results', {keys: [], vals: [], nResults: 0});
+            'search-results', { keys: [], vals: [], nResults: 0 });
         }
         sqlClient.end();
       }
