@@ -101,8 +101,8 @@ server.post('/do-submit', function(req, res) {
 
 server.get('/api/search', (req, res) => {
   validTokenOrThrow(req.query.token)
-      .then(() => new SearchResultsController(req, res).handleGetCSV())
-      .catch(() => res.render('invalid-token'));
+    .then(() => new SearchResultsController(req, res).handleGetCSV())
+    .catch(() => res.render('invalid-token'));
 });
 
 server.post('/api/public/submit-report', function(req, res) {
@@ -148,7 +148,7 @@ server.get('/updates-available', (req, res) => {
   if (!currentVersion) {
     res.writeHead(500, 'Invalid version', {'Content-Type': 'text/plain'});
     res.write('Invalid version provided ' + currentVersion);
-    res.end()
+    res.end();
   }
   // get newest version from somewhere?
   console.log(req.query.major);
@@ -168,7 +168,7 @@ server.get('/updates-available', (req, res) => {
     }
   } else {
     res.writeHead(
-        200, 'Success', {'Content-Type': 'text/plain', 'x-update': false});
+      200, 'Success', {'Content-Type': 'text/plain', 'x-update': false});
     res.write('No update available');
     res.end();
   }
@@ -176,9 +176,9 @@ server.get('/updates-available', (req, res) => {
 
 function updateNeeded(currentVersion, newestVersion, response) {
   response.writeHead(
-      200, 'Success', {'Content-Type': 'text/plain', 'x-update': true});
+    200, 'Success', {'Content-Type': 'text/plain', 'x-update': true});
   response.write(
-      'Update available. You have version (' + currentVersion +
+    'Update available. You have version (' + currentVersion +
       ') newest version is (' + newestVersion + ')');
   response.end();
 }
@@ -195,7 +195,7 @@ server.get('/get-update-script', (req, res) => {
 
 server.get('/get-update', (req, res) => {
   // TODO: ignores version query parameters
-  res.sendFile(__dirname + '/private/updates/pyedit_text_update.py');
+  res.sendFile(__dirname + '/private/updates/pyedit_test_update.py');
 });
 
 console.log(`Mapped all routes.`);
